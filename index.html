@@ -285,7 +285,7 @@
 <div class="lightbox" id="lightbox">
   <button class="lb-close" id="lb-close" aria-label="Close">×</button>
   <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">‹</button>
-  <img id="lb-img" alt="Product screenshot">
+  <img id="lb-img" alt="Product screenshot" referrerpolicy="no-referrer">
   <button class="lb-nav lb-next" id="lb-next" aria-label="Next">›</button>
 </div>
 
@@ -379,11 +379,13 @@ function driveId(url){
   return null;
 }
 function driveImageCandidates(id){
-  // multiple endpoints; we try in order until one loads
+  // Order matters: the thumbnail endpoint is the only one Google still serves
+  // reliably for cross-origin <img> embedding. The others are fallbacks.
   return [
-    `https://lh3.googleusercontent.com/d/${id}=w800`,
     `https://drive.google.com/thumbnail?id=${id}&sz=w1000`,
-    `https://drive.google.com/uc?export=view&id=${id}`
+    `https://drive.google.com/thumbnail?id=${id}&sz=w600`,
+    `https://lh3.googleusercontent.com/d/${id}=w1000`,
+    `https://drive.usercontent.google.com/download?id=${id}&export=view`
   ];
 }
 function splitPhotos(cell){
@@ -400,6 +402,7 @@ function makeImage(id, onClick){
   let attempt=0;
   const img=new Image();
   img.alt="Product screenshot"; img.loading="lazy";
+  img.referrerPolicy="no-referrer";
   img.onload=()=>{ if(skel.parentNode) skel.replaceWith(img); };
   img.onerror=()=>{ attempt++; if(attempt<cands.length){ img.src=cands[attempt]; } else { skel.remove(); } };
   img.onclick=()=>onClick(cands);
@@ -531,7 +534,7 @@ function showLb(){
   const cands=driveImageCandidates(lbIds[lbPos]);
   const img=$("#lb-img"); let a=0;
   img.onerror=()=>{ a++; if(a<cands.length) img.src=cands[a]; };
-  img.onerror=img.onerror; img.src=cands[0];
+  img.src=cands[0];
 }
 $("#lb-close").onclick=()=>$("#lightbox").classList.remove("show");
 $("#lb-prev").onclick=()=>{ lbPos=(lbPos-1+lbIds.length)%lbIds.length; showLb(); };
