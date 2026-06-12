@@ -1,28 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saamarthya · Startup Applications</title>
+<style>
+  :root{
+    --ink:#0f1c2e;
+    --ink-soft:#42536a;
+    --ink-faint:#7c8aa0;
+    --paper:#f4f2ec;
+    --card:#ffffff;
+    --line:#e3e0d6;
+    --line-soft:#eeece4;
+    --accent:#12715a;       /* deep clinical green */
+    --accent-soft:#e4f0eb;
+    --accent-ink:#0a4a3a;
+    --gold:#b8842a;
+    --shadow:0 1px 2px rgba(15,28,46,.04), 0 8px 28px rgba(15,28,46,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfaf6,#f4f2ec);
+    padding:30px 24px 22px;
+  }
+  .masthead-inner{max-width:1280px;margin:0 auto}
+  .eyebrow{
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:600;margin:0 0 8px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--line);max-width:120px}
+  h1{
+    margin:0;font-size:clamp(28px,5vw,46px);line-height:1.02;
+    font-family:Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:-.01em;
+  }
+  .sub{margin:8px 0 0;color:var(--ink-soft);font-size:15px;max-width:60ch}
+  .live-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:18px}
+  .live-pill{
+    display:inline-flex;align-items:center;gap:8px;font-size:12.5px;
+    color:var(--accent-ink);background:var(--accent-soft);
+    padding:6px 12px;border-radius:999px;font-weight:500;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);position:relative}
+  .dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+    border:1px solid var(--accent);opacity:.5;animation:ping 1.8s ease-out infinite}
+  @keyframes ping{0%{transform:scale(.8);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+  .updated{font-size:12.5px;color:var(--ink-faint)}
+
+  /* ---------- Stats ---------- */
+  .stats{
+    max-width:1280px;margin:22px auto 0;padding:0 24px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;
+  }
+  .stat{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);
+  }
+  .stat .num{font-size:30px;font-weight:600;font-family:Georgia,serif;line-height:1;color:var(--ink)}
+  .stat .lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-top:7px}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    max-width:1280px;margin:24px auto 0;padding:0 24px;
+    position:sticky;top:0;z-index:30;
+  }
+  .controls-inner{
+    background:rgba(255,255,255,.86);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;box-shadow:var(--shadow);
+  }
+  .search-wrap{position:relative;margin-bottom:12px}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--ink-faint)}
+  #search{
+    width:100%;padding:12px 14px 12px 40px;font-size:15px;font-family:inherit;
+    border:1px solid var(--line);border-radius:10px;background:#fcfbf8;color:var(--ink);
+  }
+  #search:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .filters select{
+    width:100%;padding:9px 12px;font-size:13.5px;font-family:inherit;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;background:#fcfbf8;cursor:pointer;
+    appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%237c8aa0' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
+  }
+  .filters select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+  .result-count{font-size:13px;color:var(--ink-soft)}
+  .result-count b{color:var(--ink);font-weight:600}
+  .sort-reset{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .sort-reset select{
+    padding:8px 28px 8px 12px;font-size:13px;font-family:inherit;border:1px solid var(--line);
+    border-radius:9px;background:#fcfbf8;cursor:pointer;appearance:none;color:var(--ink);
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%237c8aa0' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 11px center;
+  }
+  .btn-reset{
+    padding:8px 14px;font-size:13px;font-family:inherit;border:1px solid var(--line);
+    border-radius:9px;background:#fff;color:var(--ink-soft);cursor:pointer;
+  }
+  .btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ---------- Grid ---------- */
+  .grid{
+    max-width:1280px;margin:22px auto 60px;padding:0 24px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;
+  }
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:0 4px 10px rgba(15,28,46,.06),0 18px 42px rgba(15,28,46,.10)}
+  .card-head{padding:18px 18px 14px;border-bottom:1px solid var(--line-soft)}
+  .domain-tag{
+    display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:600;color:var(--accent-ink);background:var(--accent-soft);
+    padding:4px 9px;border-radius:6px;margin-bottom:10px;
+  }
+  .card h2{margin:0;font-size:19px;font-weight:600;line-height:1.2;letter-spacing:-.01em}
+  .founder{margin:5px 0 0;font-size:13.5px;color:var(--ink-soft)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+  .chip{
+    font-size:11.5px;color:var(--ink-soft);background:#f6f5f0;border:1px solid var(--line-soft);
+    padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip.reg{color:var(--accent-ink);background:var(--accent-soft);border-color:transparent}
+  .chip.rev{color:var(--gold);background:#faf3e3;border-color:transparent;font-weight:500}
+  .card-body{padding:14px 18px 4px;flex:1}
+  .field-label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:0 0 4px}
+  .problem{font-size:14px;color:var(--ink-soft);margin:0 0 12px}
+  .links-row{display:flex;gap:9px;flex-wrap:wrap;padding:6px 18px 16px}
+  .lnk{
+    font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:8px;
+    border:1px solid var(--line);color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;
+    background:#fff;
+  }
+  .lnk:hover{text-decoration:none;border-color:var(--accent);color:var(--accent)}
+  .lnk.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .lnk.primary:hover{background:var(--accent-ink);color:#fff}
+  .lnk.disabled{opacity:.4;pointer-events:none}
+  .lnk svg{width:13px;height:13px}
+  .expand-btn{
+    width:100%;padding:12px 18px;border:none;border-top:1px solid var(--line-soft);
+    background:#fbfaf6;color:var(--accent);font-size:13px;font-weight:600;font-family:inherit;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .expand-btn:hover{background:var(--accent-soft)}
+  .expand-btn svg{width:14px;height:14px;transition:transform .2s}
+  .card.open .expand-btn svg{transform:rotate(180deg)}
+
+  /* ---------- Thumbnails ---------- */
+  .thumbs{display:flex;gap:8px;padding:0 18px 14px;overflow-x:auto;scrollbar-width:thin}
+  .thumbs img{
+    height:96px;width:auto;border-radius:9px;border:1px solid var(--line);
+    object-fit:cover;cursor:zoom-in;background:#f6f5f0;flex:0 0 auto;
+  }
+  .thumb-skel{height:96px;width:140px;border-radius:9px;background:linear-gradient(90deg,#f0eee7,#f7f6f1,#f0eee7);background-size:200% 100%;animation:shimmer 1.4s infinite;flex:0 0 auto}
+  .thumb-file{height:96px;width:140px;border-radius:9px;border:1px dashed var(--line);background:#f8f7f2;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink-faint);text-decoration:none;text-align:center;padding:8px}
+  .thumb-file:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+  .thumb-file svg{width:24px;height:24px}
+  .thumb-file span{font-size:11px;font-weight:500;line-height:1.3}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* ---------- Expanded detail ---------- */
+  .detail{display:none;padding:4px 18px 18px;border-top:1px solid var(--line-soft);background:#fdfcf9}
+  .card.open .detail{display:block}
+  .detail dl{margin:0}
+  .detail .row{padding:12px 0;border-bottom:1px solid var(--line-soft)}
+  .detail .row:last-child{border-bottom:none}
+  .detail dt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:5px}
+  .detail dd{margin:0;font-size:14px;color:var(--ink-soft);white-space:pre-wrap;word-break:break-word}
+  .readmore{color:var(--accent);font-weight:600;cursor:pointer;font-size:13px;display:inline-block;margin-top:4px}
+  .clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* ---------- States ---------- */
+  .state{max-width:1280px;margin:60px auto;padding:0 24px;text-align:center;color:var(--ink-faint)}
+  .state .big{font-family:Georgia,serif;font-size:22px;color:var(--ink-soft);margin-bottom:8px}
+  .spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .skel-card{height:260px;border-radius:var(--radius);background:linear-gradient(90deg,#f0eee7,#f7f6f1,#f0eee7);background-size:200% 100%;animation:shimmer 1.4s infinite}
+
+  /* ---------- Lightbox ---------- */
+  .lightbox{position:fixed;inset:0;background:rgba(15,28,46,.88);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  .lightbox.show{display:flex}
+  .lightbox img{max-width:92vw;max-height:88vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .lb-close{position:absolute;top:20px;right:24px;width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .lb-close:hover{background:rgba(255,255,255,.26)}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer}
+  .lb-nav:hover{background:rgba(255,255,255,.26)}
+  .lb-prev{left:18px}.lb-next{right:18px}
+
+  footer{max-width:1280px;margin:0 auto;padding:30px 24px 50px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:12.5px}
+
+  @media (max-width:560px){
+    .masthead{padding:24px 18px 18px}
+    .stats,.controls,.grid{padding-left:18px;padding-right:18px}
+    .grid{grid-template-columns:1fr}
+    .lb-nav{width:40px;height:40px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">Saamarthya · IIHMR Startups</p>
+    <h1>Applicant Intelligence Dashboard</h1>
+    <p class="sub">A live view of every startup application — synced directly from the response sheet. Search, filter, and open any card for the full submission.</p>
+    <div class="live-row">
+      <span class="live-pill"><span class="dot"></span> Live sync from Sheet 1</span>
+      <span class="updated" id="updated">Loading…</span>
+    </div>
+  </div>
+</header>
+
+<section class="stats" id="stats"></section>
+
+<section class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="search" type="search" placeholder="Search by name, founder, problem, domain, competitors…" autocomplete="off">
+    </div>
+    <div class="filters">
+      <select id="f-state"><option value="">All States</option></select>
+      <select id="f-domain"><option value="">All Domains</option></select>
+      <select id="f-stage"><option value="">All Stages</option></select>
+      <select id="f-reg"><option value="">Any Registration</option></select>
+      <select id="f-fund"><option value="">Any Funding Status</option></select>
+    </div>
+    <div class="toolbar">
+      <div class="result-count" id="count">—</div>
+      <div class="sort-reset">
+        <select id="sort">
+          <option value="recent">Sort: Most recent</option>
+          <option value="name-asc">Name (A–Z)</option>
+          <option value="name-desc">Name (Z–A)</option>
+          <option value="state-asc">State (A–Z)</option>
+          <option value="team-desc">Team size (high→low)</option>
+          <option value="rev-desc">Monthly revenue (high→low)</option>
+        </select>
+        <button class="btn-reset" id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="state" id="loading">
+    <div class="spinner"></div>
+    <div class="big">Fetching live applications…</div>
+    <div>Reading directly from the published Google Sheet.</div>
+  </div>
+  <div class="state" id="empty" style="display:none">
+    <div class="big">No startups match your filters</div>
+    <div>Try clearing the search or resetting filters.</div>
+  </div>
+  <div class="state" id="error" style="display:none">
+    <div class="big">Couldn't load the sheet</div>
+    <div id="error-msg">The published CSV didn't respond. It will retry automatically.</div>
+  </div>
+</main>
+
+<footer>
+  Data is read live from the published response sheet and refreshes automatically every few minutes. Product images are pulled from the Google Drive links supplied in each submission; if a drive file isn't shared publicly it may not preview.
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lb-close" aria-label="Close">×</button>
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">‹</button>
+  <img id="lb-img" alt="Product screenshot" referrerpolicy="no-referrer">
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next">›</button>
+</div>
+
+<script>
+const PUBLISHED_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSf772qtvD6cxS_f3A6yV8IB44tjSZYpvH1jmgaMbMWVC-v99AAzZRDrU04xdfuD30p9K4a7SVXPix/pub?gid=486538631&single=true&output=csv";
+// GViz endpoint: serves permissive CORS headers, works from file:// and any host.
+// Needs the spreadsheet shared as "anyone with the link can view".
+const SHEET_ID = ""; // optional: paste the real /spreadsheets/d/<ID>/ here to enable the GViz CORS endpoint
+const REFRESH_MS = 3 * 60 * 1000; // auto re-fetch every 3 min
+
+// Source endpoints tried in order. CORS proxy is last-resort for file:// use.
+function buildSources(){
+  const cb = "&_cb=" + Date.now();
+  const list = [];
+  if (SHEET_ID){
+    list.push({ type:"gviz", url:`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=486538631${cb}` });
+  }
+  list.push({ type:"csv", url: PUBLISHED_CSV + cb });
+  // public read-only CORS reflectors (only used if direct fetch is blocked)
+  list.push({ type:"csv", url:"https://corsproxy.io/?url=" + encodeURIComponent(PUBLISHED_CSV + cb) });
+  list.push({ type:"csv", url:"https://api.allorigins.win/raw?url=" + encodeURIComponent(PUBLISHED_CSV + cb) });
+  return list;
+}
+
+/* ---------- Column map (by header text, resilient to reordering) ---------- */
+const COLS = {
+  name:"Startup Name",
+  founder:"Founder(s) Name",
+  state:"State",
+  website:"Startup Website",
+  linkedin:"LinkedIn Profile (Founder or Company)",
+  registered:"Are you a registered entity?",
+  team:"Current team size",
+  problem:"What problem are you solving?",
+  value:"What is your Value Proposition Statement",
+  customer:"Who is Your Customer",
+  domain:"Startup Domain",
+  stage:"Current stage",
+  competitors:"Who are your competitors?",
+  revenue:"Monthly revenue",
+  deck:"Upload your Pitch Deck",
+  photos:"Product Photos",
+  fundRound:"What was the last round of funding closed",
+  fundAmount:"Amount",
+  investor:"Investor / grant details",
+  incubated:"Have you been part of any incubator",
+  incubator:"If yes: Name of program",
+  support:"What kind of support are you seeking",
+  achievements:"Any Notable achievements"
+};
+
+/* ---------- Robust CSV parser (handles quotes, commas, newlines) ---------- */
+function parseCSV(text){
+  const rows=[]; let row=[], field="", i=0, q=false;
+  const n=text.length;
+  while(i<n){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; }
+      else field+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ row.push(field); field=""; }
+      else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else if(c==='\r'){ /* skip */ }
+      else field+=c;
+    }
+    i++;
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+
+/* match a header to our logical key by substring */
+function buildIndex(headers){
+  const idx={};
+  for(const key in COLS){
+    const needle=COLS[key].toLowerCase();
+    idx[key]=headers.findIndex(h=>h.toLowerCase().includes(needle));
+  }
+  return idx;
+}
+
+/* ---------- Google Drive link helpers ---------- */
+function driveId(url){
+  if(!url) return null;
+  let m=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  return null;
+}
+function driveImageCandidates(id){
+  // Order matters: the thumbnail endpoint is the only one Google still serves
+  // reliably for cross-origin <img> embedding. The others are fallbacks.
+  return [
+    `https://drive.google.com/thumbnail?id=${id}&sz=w1000`,
+    `https://drive.google.com/thumbnail?id=${id}&sz=w600`,
+    `https://lh3.googleusercontent.com/d/${id}=w1000`,
+    `https://drive.usercontent.google.com/download?id=${id}&export=view`
+  ];
+}
+function splitPhotos(cell){
+  if(!cell) return [];
+  return cell.split(/[\s,]+/).map(s=>s.trim()).filter(s=>s.includes("drive.google"))
+    .map(driveId).filter(Boolean);
+}
+
+/* image element that falls back through candidate URLs */
 function makeImage(id, onClick) {
-  const wrap = document.createElement("div");
-
-  const skel = document.createElement("div");
-  skel.className = "thumb-skel";
-  wrap.appendChild(skel);
-
   const img = document.createElement("img");
+
+  img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
   img.loading = "lazy";
   img.referrerPolicy = "no-referrer";
-  img.alt = "Product screenshot";
-
-  img.onload = () => {
-    wrap.innerHTML = "";
-    wrap.appendChild(img);
-  };
 
   img.onerror = () => {
-    wrap.innerHTML = "";
-    wrap.appendChild(driveFileTile(id));
+    console.log("FAILED:", id, img.src);
+  };
+
+  img.onload = () => {
+    console.log("LOADED:", id);
   };
 
   img.onclick = onClick;
 
-  img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
-
-  return wrap;
+  return img;
 }
+
+/* fallback tile for Drive links that aren't displayable images (apps, PDFs, folders) */
+function driveFileTile(id){
+  const a=el("a","thumb-file");
+  a.href="https://drive.google.com/file/d/"+id+"/view";
+  a.target="_blank"; a.rel="noopener";
+  a.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">'
+    +'<path d="M14 3v5h5"/><path d="M7 3h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>'
+    +'</svg><span>Open in Drive ↗</span>';
+  return a;
+}
+
+/* ---------- Utilities ---------- */
+const $=s=>document.querySelector(s);
+const el=(t,c)=>{const e=document.createElement(t); if(c)e.className=c; return e;};
+function esc(s){const d=document.createElement("div"); d.textContent=s==null?"":s; return d.innerHTML;}
+function fixUrl(u){ if(!u) return ""; u=u.trim(); if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
+function num(s){ if(!s) return null; const m=String(s).replace(/[, ]/g,"").match(/[\d.]+/); return m?parseFloat(m[0]):null; }
+function isFunded(round){
+  if(!round) return false;
+  const r=round.toLowerCase();
+  if(r.includes("bootstrap")||r.includes("not")||r.includes("self")||r.includes("friends")||r.includes("na")||r.includes("pre-revenue")) return false;
+  return true;
+}
+
+let DATA=[], FILTERED=[];
+
+/* ---------- Render one card ---------- */
+function card(s){
+  const c=el("div","card");
+
+  const head=el("div","card-head");
+  if(s.domain){ const t=el("span","domain-tag"); t.textContent=s.domain; head.appendChild(t); }
+  const h=el("h2"); h.textContent=s.name||"Unnamed startup"; head.appendChild(h);
+  if(s.founder){ const f=el("p","founder"); f.textContent=s.founder; head.appendChild(f); }
+
+  const meta=el("div","meta-row");
+  if(s.state){ const ch=el("span","chip"); ch.textContent="📍 "+s.state; meta.appendChild(ch); }
+  if(s.stage){ const ch=el("span","chip"); ch.textContent=s.stage; meta.appendChild(ch); }
+  if(s.team){ const ch=el("span","chip"); ch.textContent="👥 "+s.team; meta.appendChild(ch); }
+  if(/^yes$/i.test((s.registered||"").trim())){ const ch=el("span","chip reg"); ch.textContent="✓ Registered"; meta.appendChild(ch); }
+  if(num(s.revenue)){ const ch=el("span","chip rev"); ch.textContent="₹ "+s.revenue+"/mo"; meta.appendChild(ch); }
+  head.appendChild(meta);
+  c.appendChild(head);
+
+  const body=el("div","card-body");
+  if(s.problem){
+    const lab=el("p","field-label"); lab.textContent="Problem"; body.appendChild(lab);
+    const p=el("p","problem"); p.textContent=truncate(s.problem,180); body.appendChild(p);
+  }
+  c.appendChild(body);
+
+  // thumbnails
+  const ids=splitPhotos(s.photos);
+  if(ids.length){
+    const tw=el("div","thumbs");
+    ids.slice(0,6).forEach(id=> tw.appendChild(makeImage(id, ()=>openLightbox(ids,id))));
+    c.appendChild(tw);
+  }
+
+  // links
+  const lr=el("div","links-row");
+  lr.appendChild(linkBtn(fixUrl(s.website), "Website", "globe", false, !s.website));
+  lr.appendChild(linkBtn(fixUrl(s.linkedin), "LinkedIn", "in", false, !s.linkedin));
+  lr.appendChild(linkBtn(s.deck?s.deck.trim():"", "Pitch Deck", "deck", true, !s.deck));
+  c.appendChild(lr);
+
+  // expand
+  const btn=el("button","expand-btn");
+  btn.innerHTML='Full submission <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>';
+  c.appendChild(btn);
+
+  const detail=el("div","detail");
+  detail.appendChild(detailDL(s));
+  c.appendChild(detail);
+
+  btn.onclick=()=>c.classList.toggle("open");
+  return c;
+}
+
+function linkBtn(href,label,icon,primary,disabled){
+  const a=el("a","lnk"+(primary?" primary":"")+(disabled?" disabled":""));
+  if(href&&!disabled){ a.href=href; a.target="_blank"; a.rel="noopener"; }
+  const icons={
+    globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>',
+    in:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 102.5 6 2.5 2.5 0 004.98 3.5zM3 8h4v13H3zM9 8h3.8v1.8h.05c.53-1 1.83-2.05 3.77-2.05 4 0 4.74 2.6 4.74 6V21H21v-5.6c0-1.34 0-3.06-1.86-3.06s-2.15 1.46-2.15 2.96V21H13z"/></svg>',
+    deck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H4z"/><path d="M12 16v4M8 20h8"/></svg>'
+  };
+  a.innerHTML=icons[icon]+"<span>"+label+"</span>";
+  return a;
+}
+
+function detailDL(s){
+  const dl=el("dl");
+  const fields=[
+    ["Value proposition", s.value],
+    ["Customer & why it matters", s.customer],
+    ["Competitors", s.competitors],
+    ["Current stage", s.stage],
+    ["Monthly revenue (INR)", s.revenue],
+    ["Last round of funding", s.fundRound],
+    ["Funding amount", s.fundAmount],
+    ["Investor / grant details", s.investor],
+    ["Incubated / accelerated?", s.incubated],
+    ["Programme / incubator", s.incubator],
+    ["Support being sought", s.support],
+    ["Notable achievements / awards", s.achievements]
+  ];
+  fields.forEach(([label,val])=>{
+    if(!val||!val.trim()) return;
+    const row=el("div","row");
+    const dt=el("dt"); dt.textContent=label; row.appendChild(dt);
+    const dd=el("dd"); 
+    if(val.length>240){
+      dd.className="clamp"; dd.textContent=val;
+      const more=el("span","readmore"); more.textContent="Read more";
+      more.onclick=()=>{ const cl=dd.classList.toggle("clamp"); more.textContent=cl?"Read more":"Read less"; };
+      row.appendChild(dd); row.appendChild(more);
+    } else { dd.textContent=val; row.appendChild(dd); }
+    dl.appendChild(row);
+  });
+  return dl;
+}
+
+function truncate(t,n){ t=t.trim(); return t.length>n? t.slice(0,n).replace(/\s+\S*$/,"")+"…" : t; }
+
+/* ---------- Lightbox ---------- */
+let lbIds=[], lbPos=0;
+function openLightbox(ids,startId){
+  lbIds=ids; lbPos=Math.max(0,ids.indexOf(startId));
+  showLb(); $("#lightbox").classList.add("show");
+}
+function showLb(){
+  const cands=driveImageCandidates(lbIds[lbPos]);
+  const img=$("#lb-img"); let a=0;
+  img.onerror=()=>{ a++; if(a<cands.length) img.src=cands[a]; };
+  img.src=cands[0];
+}
+$("#lb-close").onclick=()=>$("#lightbox").classList.remove("show");
+$("#lb-prev").onclick=()=>{ lbPos=(lbPos-1+lbIds.length)%lbIds.length; showLb(); };
+$("#lb-next").onclick=()=>{ lbPos=(lbPos+1)%lbIds.length; showLb(); };
+$("#lightbox").onclick=e=>{ if(e.target.id==="lightbox") $("#lightbox").classList.remove("show"); };
+document.addEventListener("keydown",e=>{
+  if(!$("#lightbox").classList.contains("show")) return;
+  if(e.key==="Escape") $("#lightbox").classList.remove("show");
+  if(e.key==="ArrowLeft") $("#lb-prev").click();
+  if(e.key==="ArrowRight") $("#lb-next").click();
+});
+
+/* ---------- Filters / search / sort ---------- */
+function populateFilters(){
+  const fill=(id,vals)=>{
+    const sel=$(id); const cur=sel.value;
+    [...sel.querySelectorAll("option:not(:first-child)")].forEach(o=>o.remove());
+    [...vals].sort((a,b)=>a.localeCompare(b)).forEach(v=>{
+      const o=el("option"); o.value=v; o.textContent=v; sel.appendChild(o);
+    });
+    sel.value=cur;
+  };
+  fill("#f-state", new Set(DATA.map(s=>s.state).filter(Boolean)));
+  fill("#f-domain", new Set(DATA.map(s=>s.domain).filter(Boolean)));
+  fill("#f-stage", new Set(DATA.map(s=>s.stage).filter(Boolean)));
+  // registration
+  const reg=$("#f-reg");
+  if(reg.options.length<=1){ ["Yes","No"].forEach(v=>{const o=el("option");o.value=v;o.textContent=v==="Yes"?"Registered":"Not registered";reg.appendChild(o);}); }
+  // funding
+  const fund=$("#f-fund");
+  if(fund.options.length<=1){
+    [["funded","Has raised funding"],["boot","Bootstrapped / self-funded"]].forEach(([v,l])=>{const o=el("option");o.value=v;o.textContent=l;fund.appendChild(o);});
+  }
+}
+
+function apply(){
+  const q=$("#search").value.trim().toLowerCase();
+  const fState=$("#f-state").value, fDomain=$("#f-domain").value, fStage=$("#f-stage").value;
+  const fReg=$("#f-reg").value, fFund=$("#f-fund").value;
+
+  FILTERED=DATA.filter(s=>{
+    if(fState && s.state!==fState) return false;
+    if(fDomain && s.domain!==fDomain) return false;
+    if(fStage && s.stage!==fStage) return false;
+    if(fReg){ const yes=/^yes$/i.test((s.registered||"").trim()); if(fReg==="Yes"&&!yes)return false; if(fReg==="No"&&yes)return false; }
+    if(fFund){ const funded=isFunded(s.fundRound); if(fFund==="funded"&&!funded)return false; if(fFund==="boot"&&funded)return false; }
+    if(q){
+      const hay=[s.name,s.founder,s.problem,s.value,s.customer,s.domain,s.competitors,s.state,s.achievements,s.support].join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const sort=$("#sort").value;
+  FILTERED.sort((a,b)=>{
+    switch(sort){
+      case "name-asc": return (a.name||"").localeCompare(b.name||"");
+      case "name-desc": return (b.name||"").localeCompare(a.name||"");
+      case "state-asc": return (a.state||"").localeCompare(b.state||"");
+      case "team-desc": return (num(b.team)||0)-(num(a.team)||0);
+      case "rev-desc": return (num(b.revenue)||0)-(num(a.revenue)||0);
+      default: return (b._ts||0)-(a._ts||0);
+    }
+  });
+
+  render();
+}
+
+function render(){
+  const grid=$("#grid"); grid.innerHTML="";
+  $("#empty").style.display = FILTERED.length?"none":"block";
+  $("#count").innerHTML="<b>"+FILTERED.length+"</b> of "+DATA.length+" startups";
+  const frag=document.createDocumentFragment();
+  FILTERED.forEach(s=>frag.appendChild(card(s)));
+  grid.appendChild(frag);
+}
+
+function renderStats(){
+  const total=DATA.length;
+  const states=new Set(DATA.map(s=>s.state).filter(Boolean)).size;
+  const domains=new Set(DATA.map(s=>s.domain).filter(Boolean)).size;
+  const registered=DATA.filter(s=>/^yes$/i.test((s.registered||"").trim())).length;
+  const funded=DATA.filter(s=>isFunded(s.fundRound)).length;
+  const stats=[[total,"Applications"],[states,"States"],[domains,"Domains"],[registered,"Registered"],[funded,"Funded"]];
+  $("#stats").innerHTML=stats.map(([n,l])=>`<div class="stat"><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join("");
+}
+
+/* ---------- Load (tries each source until one returns a valid sheet) ---------- */
+async function fetchFirstWorking(){
+  const sources=buildSources();
+  const errors=[];
+  for(const src of sources){
+    try{
+      const res=await fetch(src.url,{redirect:"follow"});
+      if(!res.ok){ errors.push(src.type+" → HTTP "+res.status); continue; }
+      const text=await res.text();
+      // reject Google's HTML login/error pages
+      if(/^\s*</.test(text) || text.toLowerCase().includes("<!doctype")){ errors.push(src.type+" → got HTML, not CSV"); continue; }
+      const rows=parseCSV(text).filter(r=>r.some(c=>c&&c.trim()));
+      if(rows.length<2){ errors.push(src.type+" → no rows"); continue; }
+      return rows;
+    }catch(e){ errors.push(src.type+" → "+(e.message||"blocked")); }
+  }
+  throw new Error(errors.join(" · "));
+}
+
+async function load(){
+  try{
+    const rows=await fetchFirstWorking();
+    const headers=rows[0].map(h=>h.trim());
+    const idx=buildIndex(headers);
+
+    DATA=rows.slice(1).map((r,i)=>{
+      const g=key=> idx[key]>=0 ? (r[idx[key]]||"").trim() : "";
+      const o={};
+      for(const key in COLS) o[key]=g(key);
+      o._ts=Date.parse(r[0])||(rows.length-i);
+      return o;
+    }).filter(s=>s.name);
+
+    $("#loading").style.display="none";
+    $("#error").style.display="none";
+    renderStats();
+    populateFilters();
+    apply();
+    $("#updated").textContent="Updated "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  }catch(err){
+    if(DATA.length===0){
+      $("#loading").style.display="none";
+      $("#error").style.display="block";
+      $("#error-msg").innerHTML="Every source was blocked or empty.<br><span style='font-size:12px;opacity:.8'>"+esc(err.message)+"</span><br><br>Most often this is a sharing setting: open the sheet → Share → \"Anyone with the link can view\", and confirm File → Share → Publish to web is on. Retrying automatically…";
+    }
+  }
+}
+
+["#search","#f-state","#f-domain","#f-stage","#f-reg","#f-fund","#sort"].forEach(id=>{
+  $(id).addEventListener("input",apply);
+  $(id).addEventListener("change",apply);
+});
+$("#reset").onclick=()=>{
+  ["#f-state","#f-domain","#f-stage","#f-reg","#f-fund"].forEach(id=>$(id).value="");
+  $("#search").value=""; $("#sort").value="recent"; apply();
+};
+
+load();
+setInterval(load, REFRESH_MS);
+</script>
+</body>
+</html>
