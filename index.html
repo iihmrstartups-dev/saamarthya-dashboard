@@ -399,23 +399,24 @@ function splitPhotos(cell){
 }
 
 /* image element that falls back through candidate URLs */
-function makeImage(id, onClick){
-  const cands=driveImageCandidates(id);
-  const wrap=document.createElement("div");
-  const skel=document.createElement("div"); skel.className="thumb-skel"; wrap.appendChild(skel);
-  let attempt=0;
-  const img=new Image();
-  img.alt="Product screenshot"; img.loading="lazy";
-  img.referrerPolicy="no-referrer";
-  img.onload=()=>{ if(skel.parentNode) skel.replaceWith(img); };
-  img.onerror=()=>{
-    attempt++;
-    if(attempt<cands.length){ img.src=cands[attempt]; }
-    else { skel.replaceWith(driveFileTile(id)); } // not a displayable image → link tile
+function makeImage(id, onClick) {
+  const img = document.createElement("img");
+
+  img.src = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+
+  img.onerror = () => {
+    console.log("FAILED:", id, img.src);
   };
-  img.onclick=()=>onClick(cands);
-  img.src=cands[0];
-  return wrap;
+
+  img.onload = () => {
+    console.log("LOADED:", id);
+  };
+
+  img.onclick = onClick;
+
+  return img;
 }
 
 /* fallback tile for Drive links that aren't displayable images (apps, PDFs, folders) */
